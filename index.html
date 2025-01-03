@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Single Page: Two Modes - "Read Out Loud" and "Learn Mode"
+    Features:
+      - Baby blue color theme
+      - Paste button for both modes
+      - Text-to-Speech (TTS) for Read Out Loud
+      - Word-by-word dictionary definitions for Learn Mode
+      - Native share, QR share, and developer info in the footer
+  -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Emiley's Reading and Learning</title>
+
+  <!-- FontAwesome Icons (for icons like share, qr, etc.) -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  />
+
+  <!-- Example of a safe Google font (Poppins, in baby-blue theme) -->
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" 
+    rel="stylesheet"
+  />
+
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0; 
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #e1f3ff; /* baby-blue background */
+      color: #333;
+      text-align: center;
+    }
+
+    header {
+      background-color: #7cc0e4; /* baby-blue accent */
+      color: #0c0a0a;
+      width: 100%;
+      padding: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    header h1 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    /* Toggle buttons for each mode in the header */
+    .mode-buttons {
+      margin-top: 10px;
+    }
+
+    .mode-buttons button {
+      background-color: #fff;
+      color: #161617;
+      border: 2px solid #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+      margin: 5px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .mode-buttons button:hover {
+      background-color: #7cc0e4;
+      color: #fff;
+    }
+
+    /* Container for content below the header */
+    .container {
+      width: 90%;
+      max-width: 700px;
+      margin: 80px auto 100px auto;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: left;
+      display: none; /* hidden by default, toggled by JS */
+    }
+
+    .container.active {
+      display: block; /* show the container when active */
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 1.6em;
+      margin-bottom: 10px;
+      color: #7cc0e4;
+      font-weight: 600;
+    }
+
+    .subtext {
+      text-align: center;
+      font-size: 1em;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #7cc0e4;
+      color: #0f0000;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 5px;
+      font-size: 1em;
+      text-decoration: none;
+      margin: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #5cabcc;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .slider-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 5px 0;
+    }
+
+    .slider-container label {
+      font-size: 1em;
+      color: #333;
+      margin-right: 10px;
+      min-width: 100px;
+    }
+
+    .slider-container input[type="range"] {
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    .plus-minus-buttons {
+      display: flex;
+      gap: 5px;
+    }
+    .plus-minus-buttons button {
+      background-color: #7cc0e4;
+      color: rgb(9, 9, 9);
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      font-size: 1.2em;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .plus-minus-buttons button:hover {
+      background-color: #5cabcc;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      border: 2px solid #7cc0e4;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 1.5em;
+      resize: none;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    /* Word being spoken display */
+    .word-spoken {
+      background-color: #ffeb3b;
+      font-size: 1em;
+      padding: 8px;
+      margin-top: 10px;
+      text-align: center;
+      border-radius: 5px;
+      display: none;
+    }
+
+    /* Interactive words for "Learn Mode" */
+    #interactiveWords {
+      margin-top: 10px; 
+      text-align: justify;
+      background-color: #7cc0e4;
+    }
+    #interactiveWords span:hover {
+      background-color: #000a0d; /* slightly lighter highlight on hover */
+      color:#fff;
+    }
+
+    /* Highlighted word style */
+    .highlighted-word {
+      background-color: #ffff8d;
+      transition: background-color 0.5s ease;
+    }
+
+    /* 
+      Footer 
+      (Based on snippet provided; pinned to bottom)
+    */
+    footer {
+      background-color: #2c3e50;
+      color: #fff;
+      width: 100%;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 16px;
+      box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+    }
+
+    footer a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* Modals (QR, Developer Info) */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      border-radius: 10px;
+      text-align: center;
+      position: relative;
+    }
+
+    .close {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+    }
+
+    .qr-img {
+      width: 80%;
+      height: auto;
+    }
+
+    /* 
+      Help Overlay 
+    */
+    #helpOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #helpContent {
+      background: #fff;
+      padding: 20px;
+      max-width: 300px;
+      text-align: center;
+      border-radius: 10px;
+      color: #333;
+      position: relative;
+    }
+    #helpContent .close-btn {
+      position: absolute;
+      top: 10px; 
+      right: 10px; 
+      cursor: pointer;
+      font-size: 18px; 
+      color: #666;
+    }
+
+    @media screen and (max-width: 768px) {
+      header h1 {
+        font-size: 1.5em;
+      }
+      .slider-container {
+        flex-wrap: wrap;
+      }
+      .controls {
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section: Two Mode Buttons -->
+  <header>
+    <h1>Emiley's Reading & Learning</h1>
+    <div class="mode-buttons">
+      <button id="readModeBtn">Read Out Loud</button>
+      <button id="learnModeBtn">Learn Mode</button>
+      <button class="mode-buttons" style="background-color: #fff; color: #ea074b;" onclick="toggleHelp()">
+        <i class="fas fa-question-circle"></i> Help
+      </button>
+    </div>
+  </header>
+
+  <!-- Help Overlay for usage instructions -->
+  <div id="helpOverlay">
+    <div id="helpContent">
+      <span class="close-btn" onclick="toggleHelp()">×</span>
+      <h3>How to Use</h3>
+      <p>
+        1. Choose a mode above (<strong>Read Out Loud</strong> or <strong>Learn Mode</strong>).<br>
+        2. Use <strong>Paste</strong> button to quickly insert text from your clipboard.<br>
+        3. Click <strong>Read Aloud</strong> to hear text, or in Learn Mode, click words for definitions.<br>
+        4. Adjust speed, volume, or choose a voice.<br>
+        5. Use footer to share or see developer info.
+      </p>
+    </div>
+  </div>
+
+  <!-- Container for READ OUT LOUD MODE -->
+  <div class="container" id="readModeContainer">
+    <h2 class="section-title">Read Out Loud</h2>
+    <p class="subtext">Paste or type your text below and let the computer read it to you.</p>
+
+    <!-- Paste button + Textarea -->
+    <button class="btn" onclick="pasteText('textInput')"><i class="fas fa-paste"></i> Paste</button>
+    <textarea id="textInput" placeholder="Type or paste your text here..."></textarea>
+
+    <!-- Reading Controls (Speed, Volume, Voice) -->
+    <div class="controls">
+      <div class="slider-container">
+        <label for="rate">Reading Speed:</label>
+        <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1"/>
+        <div class="plus-minus-buttons">
+          <button onclick="adjustRate(0.1)">+</button>
+          <button onclick="adjustRate(-0.1)">-</button>
+        </div>
+      </div>
+
+      <div class="slider-container">
+        <label for="volume">Volume:</label>
+        <input type="range" id="volume" min="0" max="1" step="0.1" value="1"/>
+        <div class="plus-minus-buttons">
+          <button onclick="adjustVolume(0.1)">+</button>
+          <button onclick="adjustVolume(-0.1)">-</button>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content: space-between;">
+        <label for="voiceSelect" style="margin-right:10px;">Voice:</label>
+        <select id="voiceSelect" style="flex:1;"></select>
+      </div>
+    </div>
+
+    <!-- Buttons for read control -->
+    <div style="text-align:center; margin-top:15px;">
+      <button class="btn" onclick="speakText()">Read Aloud</button>
+      <button class="btn" onclick="pauseOrResume()">Pause/Resume</button>
+      <button class="btn" onclick="stopReading()">Stop</button>
+      <button class="btn" onclick="clearText('textInput')">Clear</button>
+    </div>
+
+    <!-- Word being spoken display -->
+    <div id="wordSpoken" class="word-spoken"></div>
+  </div>
+
+  <!-- Container for LEARN MODE -->
+  <div class="container" id="learnModeContainer">
+    <h2 class="section-title">Learn Mode</h2>
+    <p class="subtext">Click individual words to hear them pronounced and see definitions.</p>
+
+    <!-- Paste button + Textarea -->
+    <button class="btn" onclick="pasteText('pronunciationInput')"><i class="fas fa-paste"></i> Paste</button>
+    <textarea id="pronunciationInput" placeholder="Type or paste text here..."></textarea>
+
+    <div style="text-align:center; margin-top:10px;">
+      <button class="btn" onclick="enablePronunciationMode()">Start</button>
+      <button class="btn" onclick="clearText('pronunciationInput')">Clear</button>
+    </div>
+
+    <!-- Interactive words placed here dynamically -->
+    <div id="interactiveWords"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <b>
+      <a href="#" onclick="showModal()" style="color: #fff; text-decoration: none; margin-right: 20px;">
+        <i class="fas fa-qrcode"></i>QR
+      </a>
+      <button onclick="nativeShare()" style="background: none; border: none; color: #fff; font-size: 16px; cursor: pointer;">
+        <i class="fas fa-share-alt"></i> <b>Share</b>
+      </button>
+      <a href="#" onclick="showDeveloperInfo()" style="color: #fff; text-decoration: none; margin-left: 20px;">
+        <i class="fas fa-tools"></i> By
+      </a>
+    </b>
+  </footer>
+
+  <!-- QR Modal -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <!-- Replace "qr.png" with your QR code image if needed -->
+      <img src="qr.png" alt="QR Code" class="qr-img" />
+      <p>Share this page with friends!</p>
+    </div>
+  </div>
+
+  <!-- Developer Info Modal -->
+  <div id="developerModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeDeveloperModal()">&times;</span>
+      <h3>About the Developer</h3>
+      <p>
+        This page is built to help Emiley read and learn efficiently. 
+        For inquiries or custom software development requests:
+      </p>
+      <p><a href="mailto:emailofanup@gmail.com"><strong>Email me</strong> </a></p>
+      <p> 
+        <a href="https://fitandfine.github.io/anup/" target="_blank"><strong>Visit my page:</strong></a>
+      </p>
+    </div>
+  </div>
+
+  <!-- JavaScript Section -->
+  <script>
+    /*********************************************************
+     *                INITIALIZATION & GLOBALS
+     *********************************************************/
+    const synth = window.speechSynthesis;
+    let voices = [];
+    let utterance;
+    let isSpeaking = false;
+    let isPaused = false;
+
+    function populateVoiceList() {
+      voices = synth.getVoices();
+      const voiceSelect = document.getElementById('voiceSelect');
+      voiceSelect.innerHTML = '';
+
+      voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.textContent = `${voice.name} (${voice.lang})`;
+        option.value = voice.name;
+        voiceSelect.appendChild(option);
+      });
+    }
+    populateVoiceList();
+    synth.onvoiceschanged = populateVoiceList;
+
+    // Get the user-chosen voice
+    function getSelectedVoice() {
+      const selectedName = document.getElementById('voiceSelect').value;
+      return voices.find(voice => voice.name === selectedName);
+    }
+
+    /*********************************************************
+     *                MODE TOGGLING
+     *********************************************************/
+    const readModeContainer = document.getElementById('readModeContainer');
+    const learnModeContainer = document.getElementById('learnModeContainer');
+    const readModeBtn = document.getElementById('readModeBtn');
+    const learnModeBtn = document.getElementById('learnModeBtn');
+
+    function showReadMode() {
+      readModeContainer.classList.add('active');
+      learnModeContainer.classList.remove('active');
+    }
+
+    function showLearnMode() {
+      learnModeContainer.classList.add('active');
+      readModeContainer.classList.remove('active');
+    }
+
+    readModeBtn.addEventListener('click', showReadMode);
+    learnModeBtn.addEventListener('click', showLearnMode);
+
+    // Show read mode by default on page load
+    window.onload = () => {
+      showReadMode();
+    };
+
+    /*********************************************************
+     *                PASTE FUNCTIONALITY
+     *********************************************************/
+    async function pasteText(elementId) {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById(elementId).value = text;
+      } catch (err) {
+        alert("Unable to paste automatically. Please allow clipboard permissions or paste manually.");
+      }
+    }
+
+    /*********************************************************
+     *                TEXT-TO-SPEECH 
+     *********************************************************/
+    function speakText() {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) return;
+
+      if(isSpeaking) {
+        // Cancel previous speech if already speaking
+        synth.cancel();
+      }
+
+      utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = getSelectedVoice();
+      utterance.rate = parseFloat(document.getElementById('rate').value);
+      utterance.volume = parseFloat(document.getElementById('volume').value);
+
+      const words = text.split(' ');
+      let wordIndex = 0;
+
+      utterance.onboundary = (event) => {
+        if (event.name === 'word') {
+          const spokenWord = words[wordIndex++];
+          highlightWord(spokenWord);
+          const wordSpokenDiv = document.getElementById('wordSpoken');
+          wordSpokenDiv.textContent = "Word Being Spoken: " + spokenWord;
+          wordSpokenDiv.style.display = "block";
+        }
+      };
+
+      utterance.onend = () => {
+        clearHighlight();
+        isSpeaking = false;
+        isPaused = false;
+        document.getElementById('wordSpoken').style.display = "none";
+      };
+
+      isSpeaking = true;
+      synth.speak(utterance);
+    }
+
+    function pauseOrResume() {
+      if (!isSpeaking) return;
+      if (isPaused) {
+        synth.resume();
+        isPaused = false;
+      } else {
+        synth.pause();
+        isPaused = true;
+      }
+    }
+
+    function stopReading() {
+      if (isSpeaking) {
+        synth.cancel();
+        isSpeaking = false;
+        document.getElementById('wordSpoken').style.display = "none";
+      }
+    }
+
+    function highlightWord(word) {
+      const textInput = document.getElementById('textInput');
+      textInput.innerHTML = textInput.value.replace(word, `<span class='highlighted-word'>${word}</span>`);
+    }
+    function clearHighlight() {
+      const textVal = document.getElementById('textInput').value;
+      document.getElementById('textInput').innerHTML = textVal;
+    }
+
+    function adjustRate(amount) {
+      const rateSlider = document.getElementById('rate');
+      rateSlider.value = Math.max(0.5, Math.min(2, parseFloat(rateSlider.value) + amount));
+      if (isSpeaking) {
+        synth.cancel();
+        speakText();
+      }
+    }
+    function adjustVolume(amount) {
+      const volumeSlider = document.getElementById('volume');
+      volumeSlider.value = Math.max(0, Math.min(1, parseFloat(volumeSlider.value) + amount));
+      if (isSpeaking) {
+        synth.cancel();
+        speakText();
+      }
+    }
+
+    function clearText(elementId) {
+      document.getElementById(elementId).value = '';
+      if (elementId === 'textInput') stopReading();
+    }
+
+    /*********************************************************
+     *        LEARN MODE (Word-by-word + Definitions)
+     *********************************************************/
+    async function enablePronunciationMode() {
+      const text = document.getElementById('pronunciationInput').value.trim();
+      const interactiveContainer = document.getElementById('interactiveWords');
+      interactiveContainer.innerHTML = '';
+      if (!text) return;
+
+      const words = text.split(' ');
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const span = document.createElement('span');
+        span.textContent = word + ' ';
+        span.style.cursor = 'pointer';
+
+        span.onclick = async () => {
+          // speak the word
+          const wordUtterance = new SpeechSynthesisUtterance(word);
+          synth.speak(wordUtterance);
+
+          // fetch definition
+          const definition = await fetchWordDefinition(word);
+          if (definition) {
+            alert(`Word: ${word}\nDefinition: ${definition}`);
+          } else {
+            alert(`No definition found for "${word}".`);
+          }
+        };
+        interactiveContainer.appendChild(span);
+      }
+    }
+
+    async function fetchWordDefinition(word) {
+      try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        const data = await response.json();
+        if (Array.isArray(data) && data[0].meanings && data[0].meanings.length > 0) {
+          const defObj = data[0].meanings[0].definitions[0];
+          return defObj.definition || "No definition found.";
+        } else {
+          return "No definition found.";
+        }
+      } catch (e) {
+        return "Error fetching definition.";
+      }
+    }
+
+    /*********************************************************
+     *                   HELP OVERLAY
+     *********************************************************/
+    function toggleHelp() {
+      const overlay = document.getElementById('helpOverlay');
+      overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+      if (overlay.style.display === 'flex') {
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+      }
+    }
+
+    /*********************************************************
+     *                SHARE FUNCTIONS
+     *********************************************************/
+    function nativeShare() {
+      if (navigator.share) {
+        navigator.share({
+          title: "Emiley's Reading & Learning Page",
+          text: "Check out this page for reading help!",
+          url: window.location.href
+        })
+        .catch(error => console.log('Error sharing:', error));
+      } else {
+        alert("Sharing not supported on this browser. Please copy the link manually.");
+      }
+    }
+
+    /*********************************************************
+     *                   FOOTER MODALS
+     *********************************************************/
+    function showModal() {
+      document.getElementById("qrModal").style.display = "block";
+    }
+    function closeModal() {
+      document.getElementById("qrModal").style.display = "none";
+    }
+    function showDeveloperInfo() {
+      document.getElementById("developerModal").style.display = "block";
+    }
+    function closeDeveloperModal() {
+      document.getElementById("developerModal").style.display = "none";
+    }
+
+    // Close modals if user clicks outside modal content
+    window.onclick = function(event) {
+      if (event.target === document.getElementById("qrModal")) {
+        closeModal();
+      }
+      if (event.target === document.getElementById("developerModal")) {
+        closeDeveloperModal();
+      }
+      if (event.target === document.getElementById("helpOverlay")) {
+        toggleHelp();
+      }
+    }
+  </script>
+</body>
+</html>
