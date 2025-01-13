@@ -282,33 +282,48 @@
     /* 
       Help Overlay 
     */
-    #helpOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    #helpContent {
-      background: #fff;
-      padding: 20px;
-      max-width: 300px;
-      text-align: center;
-      border-radius: 10px;
-      color: #333;
-      position: relative;
-    }
-    #helpContent .close-btn {
-      position: absolute;
-      top: 10px; 
-      right: 10px; 
-      cursor: pointer;
-      font-size: 18px; 
-      color: #666;
-    }
+  /* Replace your existing #helpOverlay and #helpContent CSS with these */
+
+#helpOverlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  display: none;              /* hidden by default; shown when toggled */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  /* Background image with a translucent overlay */
+  
+  background-size: cover;     /* make sure the image covers the screen */
+}
+
+#helpContent {
+  //background: rgba(255,255,255,1); /* translucent white background */
+   /* Background image with a translucent overlay */
+   background: 
+    linear-gradient(rgba(249, 247, 247, 0.1), rgba(238, 236, 236, 1)), 
+    url('emmie.jpg') no-repeat center center;
+  background-size: cover;     /* make sure the image covers the screen */
+  padding: 20px;
+  max-width: 300px;
+  text-align: center;
+  border-radius: 10px;
+  color: #333;
+  position: relative;
+}
+
+/* Close button remains the same, but included for clarity */
+#helpContent .close-btn {
+  position: absolute;
+  top: 10px; 
+  right: 10px; 
+  cursor: pointer;
+  font-size: 18px; 
+  color: #9eed0b;
+}
+
 
     @media screen and (max-width: 768px) {
       header h1 {
